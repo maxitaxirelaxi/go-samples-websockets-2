@@ -4,31 +4,78 @@
 </head>
 
 <body>
-    <h1>Long/lat:</h1>
-    <!-- 1 -->
-    <div id="long"></div>
-    <div id="lat"></div>
+    <h1>Output</h1>
+    <div id="output"></div>
+    <h1>Event</h1>
     <div id="event"></div>
     <script type="text/javascript">
-        //var long = document.getElementById("long");
-        //var lat = document.getElementById("lat");
+        var output = document.getElementById("output");
         var event = document.getElementById("event");
+        var webSocket = new WebSocket("ws://localhost:8844/ws")
 
-        // 2
-        var exampleSocket = new WebSocket("ws://localhost:8844/ws")
+        webSocket.onopen = function (evt) {
+            onOpen(evt)
+        };
 
-        // 3
+        webSocket.onclose = function (evt) {
+            onClose(evt)
+        };
+        webSocket.onmessage = function (evt) {
+            onMessage(evt)
+        };
+        webSocket.onerror = function (evt) {
+            onError(evt)
+        };
+
+
         var update = function () {
+            webSocket.onmessage = function (event) {
+                writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
+                var obj = JSON.parse(event.data);
+                console.info("obj.EventName: " + obj.EventName)
+                console.info("obj.Data: " + obj.Data)
+                console.info("obj.Data.vehicle: " + obj.Data.vehicle)
 
-            exampleSocket.onmessage = function (event) {
-                console.info("data received: " + event.data)
-                //var longlatArr = event.data.split(" ");
-                //long.textContent = longlatArr[1].toString();
-                //lat.textContent = longlatArr[0].toString();
+                var objEventData = JSON.parse(obj.Data);
+                console.info("objEventData.vehicle: " + objEventData.vehicle)
+                console.info("objEventData.status: " + objEventData.status)
 
             }
         };
+
         window.setTimeout(update);
+
+        function onOpen(evt) {
+            writeToScreen("CONNECTED");
+            doSend("webSocket rocks");
+        }
+
+        function onClose(evt) {
+            writeToScreen("DISCONNECTED");
+        }
+
+        function onMessage(evt) {
+            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+            webSocket.close();
+        }
+
+        function onError(evt) {
+            writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+        }
+
+        function writeToScreen(message) {
+            var pre = document.createElement("p");
+            pre.style.wordWrap = "break-word";
+            pre.innerHTML = message;
+            output.appendChild(pre);
+        }
+
+        function doSend(message) {
+            writeToScreen("SENT: " + message);
+            webSocket.send(message);
+        }
+
+        //window.addEventListener("load", init, false);
     </script>
 </body>
 
