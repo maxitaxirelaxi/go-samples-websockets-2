@@ -90,7 +90,16 @@ func wsHandler(w http.ResponseWriter, r *http.Request) {
 func echo() {
 	for {
 		val := <-broadcast
-		eventString := fmt.Sprintf("%f %f %s", val.EventName, val.Data)
+		b, err := json.Marshal(val)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(string(b))
+		//eventString := fmt.Sprintf("%s %s", val.EventName, val.Data)
+		eventString := string(b)
+
+		fmt.Println("eventString=" + eventString)
 		// send to every client that is currently connected
 		for client := range clients {
 			err := client.WriteMessage(websocket.TextMessage, []byte(eventString))

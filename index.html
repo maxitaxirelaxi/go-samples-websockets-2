@@ -19,15 +19,16 @@
 
         // 3
         var update = function () {
-                exampleSocket.onmessage = function (event) {
-                    console.info(event.data[)
-                        //var longlatArr = event.data.split(" ");
-                        //long.textContent = longlatArr[1].toString();
-                        //lat.textContent = longlatArr[0].toString();
 
-                    }
-                };
-                window.setTimeout(update);
+            exampleSocket.onmessage = function (event) {
+                console.info("data received: " + event.data)
+                //var longlatArr = event.data.split(" ");
+                //long.textContent = longlatArr[1].toString();
+                //lat.textContent = longlatArr[0].toString();
+
+            }
+        };
+        window.setTimeout(update);
     </script>
 </body>
 
