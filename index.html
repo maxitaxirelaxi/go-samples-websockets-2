@@ -1,0 +1,34 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <h1>Long/lat:</h1>
+    <!-- 1 -->
+    <div id="long"></div>
+    <div id="lat"></div>
+    <div id="event"></div>
+    <script type="text/javascript">
+        //var long = document.getElementById("long");
+        //var lat = document.getElementById("lat");
+        var event = document.getElementById("event");
+
+        // 2
+        var exampleSocket = new WebSocket("ws://localhost:8844/ws")
+
+        // 3
+        var update = function () {
+                exampleSocket.onmessage = function (event) {
+                    console.info(event.data[)
+                        //var longlatArr = event.data.split(" ");
+                        //long.textContent = longlatArr[1].toString();
+                        //lat.textContent = longlatArr[0].toString();
+
+                    }
+                };
+                window.setTimeout(update);
+    </script>
+</body>
+
+</html>
