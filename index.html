@@ -1,82 +1,124 @@
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <title>A simple map</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://api.mapbox.com/mapbox.js/v3.2.0/mapbox.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox.js/v3.2.0/mapbox.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 500px;
+        height: 500px;
+      }
+    </style>
+  </head>
 
-<head>
-</head>
-
-<body>
+  <body>
     <h1>Output</h1>
     <div id="output"></div>
     <h1>Event</h1>
     <div id="event"></div>
+    <div id="map"></div>
+
+    <!-- <script>
+      L.mapbox.accessToken =
+        "pk.eyJ1IjoibWF4a2VsbGVyIiwiYSI6ImNqeXhpZTUzajB4cngzbW1pemMybHVhZzUifQ.1zQL-v1eF0WNfaLtddOQmg";
+      var map = L.mapbox
+        .map("map")
+        .setView([40, -74.5], 9)
+        .addLayer(L.mapbox.styleLayer("mapbox://styles/mapbox/streets-v11"));
+    </script> -->
+
     <script type="text/javascript">
-        var output = document.getElementById("output");
-        var event = document.getElementById("event");
-        var webSocket = new WebSocket("ws://localhost:8844/ws")
+      L.mapbox.accessToken =
+        "pk.eyJ1IjoibWF4a2VsbGVyIiwiYSI6ImNqeXhpZTUzajB4cngzbW1pemMybHVhZzUifQ.1zQL-v1eF0WNfaLtddOQmg";
+      var map = L.mapbox
+        .map("map")
+        .setView([40, -74.5], 9)
+        .addLayer(L.mapbox.styleLayer("mapbox://styles/mapbox/streets-v11"));
 
-        webSocket.onopen = function (evt) {
-            onOpen(evt)
+      var output = document.getElementById("output");
+      var event = document.getElementById("event");
+      var webSocket = new WebSocket("ws://localhost:8844/ws");
+
+      webSocket.onopen = function(evt) {
+        onOpen(evt);
+      };
+
+      webSocket.onclose = function(evt) {
+        onClose(evt);
+      };
+      webSocket.onmessage = function(evt) {
+        onMessage(evt);
+      };
+      webSocket.onerror = function(evt) {
+        onError(evt);
+      };
+
+      var update = function() {
+        webSocket.onmessage = function(event) {
+          writeToScreen(
+            '<span style="color: blue;">RESPONSE: ' + event.data + "</span>"
+          );
+          var obj = JSON.parse(event.data);
+          console.info("obj.EventName: " + obj.EventName);
+          console.info("obj.Data: " + obj.Data);
+          console.info("obj.Data.vehicle: " + obj.Data.vehicle);
+
+          var objEventData = JSON.parse(obj.Data);
+          console.info("objEventData.vehicle: " + objEventData.vehicle);
+          console.info("objEventData.status: " + objEventData.status);
         };
+      };
 
-        webSocket.onclose = function (evt) {
-            onClose(evt)
-        };
-        webSocket.onmessage = function (evt) {
-            onMessage(evt)
-        };
-        webSocket.onerror = function (evt) {
-            onError(evt)
-        };
+      window.setTimeout(update);
 
+      function onOpen(evt) {
+        writeToScreen("CONNECTED");
+        doSend("webSocket rocks");
+      }
 
-        var update = function () {
-            webSocket.onmessage = function (event) {
-                writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
-                var obj = JSON.parse(event.data);
-                console.info("obj.EventName: " + obj.EventName)
-                console.info("obj.Data: " + obj.Data)
-                console.info("obj.Data.vehicle: " + obj.Data.vehicle)
+      function onClose(evt) {
+        writeToScreen("DISCONNECTED");
+      }
 
-                var objEventData = JSON.parse(obj.Data);
-                console.info("objEventData.vehicle: " + objEventData.vehicle)
-                console.info("objEventData.status: " + objEventData.status)
+      function onMessage(evt) {
+        writeToScreen(
+          '<span style="color: blue;">RESPONSE: ' + evt.data + "</span>"
+        );
+        webSocket.close();
+      }
 
-            }
-        };
+      function onError(evt) {
+        writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+      }
 
-        window.setTimeout(update);
+      function writeToScreen(message) {
+        var pre = document.createElement("p");
+        pre.style.wordWrap = "break-word";
+        pre.innerHTML = message;
+        output.appendChild(pre);
+      }
 
-        function onOpen(evt) {
-            writeToScreen("CONNECTED");
-            doSend("webSocket rocks");
-        }
+      function doSend(message) {
+        writeToScreen("SENT: " + message);
+        webSocket.send(message);
+      }
 
-        function onClose(evt) {
-            writeToScreen("DISCONNECTED");
-        }
-
-        function onMessage(evt) {
-            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
-            webSocket.close();
-        }
-
-        function onError(evt) {
-            writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
-        }
-
-        function writeToScreen(message) {
-            var pre = document.createElement("p");
-            pre.style.wordWrap = "break-word";
-            pre.innerHTML = message;
-            output.appendChild(pre);
-        }
-
-        function doSend(message) {
-            writeToScreen("SENT: " + message);
-            webSocket.send(message);
-        }
-
-        //window.addEventListener("load", init, false);
+      //window.addEventListener("load", init, false);
     </script>
-</body>
-
+  </body>
 </html>
