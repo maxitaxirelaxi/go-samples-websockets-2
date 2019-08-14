@@ -22,107 +22,107 @@
 
 <body>
     <div id='map'></div>
-    <h1>Output</h1>
-    <div id="output"></div>
-    <h1>Event</h1>
-    <div id="event"></div>
+    <h1>Output</h <div id="output">
+        </div>
+        <h1>Event</h1>
+        <div id="event"></div>
 
-    <script type="text/javascript">
-        L.mapbox.accessToken =
-            'pk.eyJ1IjoiZ29vZHZpYmVzanVtcGVyIiwiYSI6ImNqeW0yYTl0eDA2NjAzb3F3dG1sdnFmMHkifQ.fHgzUPt8ORrvA_kBGCn-NA';
-        var map = L.mapbox.map('map')
-            .setView([29, -26], 2)
-            .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10'));
+        <script type="text/javascript">
+            L.mapbox.accessToken =
+                'pk.eyJ1IjoiZ29vZHZpYmVzanVtcGVyIiwiYSI6ImNqeW0yYTl0eDA2NjAzb3F3dG1sdnFmMHkifQ.fHgzUPt8ORrvA_kBGCn-NA';
+            var map = L.mapbox.map('map')
+                .setView([29, -26], 2)
+                .addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/light-v10'));
 
-        var marker = L.marker([-73, 40], {
-            icon: L.mapbox.marker.icon({
-                'marker-color': '#f86767'
-            })
-        });
+            var marker = L.marker([-73, 40], {
+                icon: L.mapbox.marker.icon({
+                    'marker-color': '#f86767'
+                })
+            });
 
-        var t = 0;
-        /*window.setInterval(function () {
-            // Making a lissajous curve just for fun.
-            // Create your own animated path here.
-            marker.setLatLng(L.latLng(
-                Math.cos(t * 0.5) * 50,
-                Math.sin(t) * 50));
-            t += 0.1;
-        }, 50);*/
+            var t = 0;
+            /*window.setInterval(function () {
+                // Making a lissajous curve just for fun.
+                // Create your own animated path here.
+                marker.setLatLng(L.latLng(
+                    Math.cos(t * 0.5) * 50,
+                    Math.sin(t) * 50));
+                t += 0.1;
+            }, 50);*/
 
-        marker.setLatLng(L.latLng(40.728, -111.59))
-        marker.addTo(map);
+            marker.setLatLng(L.latLng(40.728, -111.59))
+            marker.addTo(map);
 
-        var output = document.getElementById("output");
-        var event = document.getElementById("event");
-        var webSocket = new WebSocket("ws://localhost:8844/ws")
+            var output = document.getElementById("output");
+            var event = document.getElementById("event");
+            var webSocket = new WebSocket("ws://localhost:8844/ws")
 
-        webSocket.onopen = function (evt) {
-            onOpen(evt)
-        };
+            webSocket.onopen = function (evt) {
+                onOpen(evt)
+            };
 
-        webSocket.onclose = function (evt) {
-            onClose(evt)
-        };
-        /*webSocket.onmessage = function (evt) {
-            onMessage(evt)
-        };*/
-        webSocket.onerror = function (evt) {
-            onError(evt)
-        };
+            webSocket.onclose = function (evt) {
+                onClose(evt)
+            };
+            /*webSocket.onmessage = function (evt) {
+                onMessage(evt)
+            };*/
+            webSocket.onerror = function (evt) {
+                onError(evt)
+            };
 
 
-        var update = function () {
-            webSocket.onmessage = function (event) {
-                writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
-                var obj = JSON.parse(event.data);
-                console.info("obj.EventName: " + obj.EventName)
-                console.info("obj.Data: " + obj.Data)
-                console.info("obj.Data.vehicle: " + obj.Data.vehicle)
+            var update = function () {
+                webSocket.onmessage = function (event) {
+                    writeToScreen('<span style="color: blue;">RESPONSE: ' + event.data + '</span>');
+                    var obj = JSON.parse(event.data);
+                    console.info("obj.EventName: " + obj.EventName)
+                    console.info("obj.Data: " + obj.Data)
+                    console.info("obj.Data.vehicle: " + obj.Data.vehicle)
 
-                var objEventData = JSON.parse(obj.Data);
-                console.info("objEventData.vehicle: " + objEventData.vehicle)
-                console.info("objEventData.status: " + objEventData.status)
-                console.info("objEventData.lat: " + parseFloat(objEventData.lat))
-                console.info("objEventData.long: " + parseFloat(objEventData.long))
-                marker.setLatLng(L.latLng(parseFloat(objEventData.lat), parseFloat(objEventData.long)))
+                    var objEventData = JSON.parse(obj.Data);
+                    console.info("objEventData.vehicle: " + objEventData.vehicle)
+                    console.info("objEventData.status: " + objEventData.status)
+                    console.info("objEventData.lat: " + parseFloat(objEventData.lat))
+                    console.info("objEventData.long: " + parseFloat(objEventData.long))
+                    marker.setLatLng(L.latLng(parseFloat(objEventData.lat), parseFloat(objEventData.long)))
+                }
+            };
+
+            window.setTimeout(update);
+
+            function onOpen(evt) {
+                writeToScreen("CONNECTED");
+                doSend("webSocket rocks");
             }
-        };
 
-        window.setTimeout(update);
+            function onClose(evt) {
+                writeToScreen("DISCONNECTED");
+            }
 
-        function onOpen(evt) {
-            writeToScreen("CONNECTED");
-            doSend("webSocket rocks");
-        }
+            function onMessage(evt) {
+                writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+                webSocket.close();
+            }
 
-        function onClose(evt) {
-            writeToScreen("DISCONNECTED");
-        }
+            function onError(evt) {
+                writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+            }
 
-        function onMessage(evt) {
-            writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
-            webSocket.close();
-        }
+            function writeToScreen(message) {
+                var pre = document.createElement("p");
+                pre.style.wordWrap = "break-word";
+                pre.innerHTML = message;
+                output.appendChild(pre);
+            }
 
-        function onError(evt) {
-            writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
-        }
+            function doSend(message) {
+                writeToScreen("SENT: " + message);
+                webSocket.send(message);
+            }
 
-        function writeToScreen(message) {
-            var pre = document.createElement("p");
-            pre.style.wordWrap = "break-word";
-            pre.innerHTML = message;
-            output.appendChild(pre);
-        }
-
-        function doSend(message) {
-            writeToScreen("SENT: " + message);
-            webSocket.send(message);
-        }
-
-        //window.addEventListener("load", init, false);
-    </script>
+            //window.addEventListener("load", init, false);
+        </script>
 </body>
 
 </html>
