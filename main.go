@@ -38,8 +38,9 @@ func main() {
 	router.HandleFunc("/event", eventHandler).Methods("POST")
 	router.HandleFunc("/ws", wsHandler)
 	go echo()
-
+	fmt.Println("Server listening on 8844")
 	log.Fatal(http.ListenAndServe(":8844", router))
+
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +78,7 @@ func eventHandler(w http.ResponseWriter, r *http.Request) {
 }*/
 
 func wsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("wsHandler() called")
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
