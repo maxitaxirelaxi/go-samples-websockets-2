@@ -18,7 +18,7 @@ type longLatStruct struct {
 
 type eventStruct struct {
 	EventName string `json: eventName`
-	Data      string `json: data`
+	EventData string `json: eventData`
 }
 
 var clients = make(map[*websocket.Conn]bool)
